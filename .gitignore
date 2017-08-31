@@ -48,6 +48,10 @@ fips_fmp_utils
 /System.map
 /Module.markers
 /Module.symvers
+build.sh
+build.log
+arch/arm64/boot/boot.img-dtb
+fips_fmp_utils
 
 #
 # Debian directory (make deb-pkg)
@@ -66,6 +70,7 @@ fips_fmp_utils
 include/config
 include/generated
 arch/*/include/generated
+arch/arm64/boot/dtb/
 
 # stgit generated dirs
 patches-*
