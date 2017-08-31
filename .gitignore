@@ -44,6 +44,10 @@ modules.builtin
 /System.map
 /Module.markers
 /Module.symvers
+build.sh
+build.log
+arch/arm64/boot/boot.img-dtb
+fips_fmp_utils
 
 #
 # Debian directory (make deb-pkg)
@@ -62,6 +66,7 @@ modules.builtin
 include/config
 include/generated
 arch/*/include/generated
+arch/arm64/boot/dtb/
 
 # stgit generated dirs
 patches-*
