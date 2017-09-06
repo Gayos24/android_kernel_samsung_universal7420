@@ -411,7 +411,6 @@ static int ecryptfs_open(struct inode *inode, struct file *file)
 		rc = -EPERM;
 		goto out;
 	}
-
 	/* Released in ecryptfs_release or end of function if failure */
 	file_info = kmem_cache_zalloc(ecryptfs_file_info_cache, GFP_KERNEL);
 	ecryptfs_set_file_private(file, file_info);
