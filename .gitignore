@@ -33,6 +33,10 @@ modules.builtin
 *.patch
 *.gcno
 
+build.sh
+build.log
+fips_fmp_utils
+
 #
 # Top-level generic files
 #
