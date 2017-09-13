@@ -1,0 +1,36 @@
+#!/system/bin/sh
+
+cat << CTAG
+{
+    name:"ABOUT",
+    elements:[
+	{ SLiveLabel:{
+		description:"\n",
+		refresh:10000000,
+		action:"echo Hello"
+	}},
+	{ SLiveLabel:{
+		refresh:10000000,
+		style:"bold",
+		action:"echo Welcome to the Nougat EdYoBlue Kernel!"
+	}},
+	{ SLiveLabel:{
+		refresh:10000000,
+		action:"echo by"
+	}},
+	{ SLiveLabel:{
+		refresh:10000000,
+		style:"bold",
+		action:"echo remyz17"
+	}},
+	{ SSpacer:{
+		height:1
+	}},
+	{ SButton:{
+		label:"Github sources",
+		action:"am start -a android.intent.action.VIEW -d https://github.com/remyz17/android_kernel_samsung_universal7420/ > /dev/null;
+		echo Opening browser...;"
+	}},
+    ]
+}
+CTAG

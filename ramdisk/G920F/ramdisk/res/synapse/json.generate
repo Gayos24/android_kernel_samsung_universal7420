@@ -1,0 +1,10 @@
+#!/system/bin/sh
+
+cat << CTAG
+
+{
+    sections: [
+		`. /res/synapse/json.generate.about`,
+    ]
+}
+CTAG
