@@ -32,10 +32,8 @@ modules.builtin
 *.lzo
 *.patch
 *.gcno
+*.img
 
-build.sh
-build.log
-fips_fmp_utils
 
 #
 # Top-level generic files
@@ -52,6 +50,10 @@ build.sh
 build.log
 arch/arm64/boot/boot.img-dtb
 fips_fmp_utils
+security/selinux_n/av_permissions.h
+security/selinux_n/flask.h
+ramdisk/G925F/split_img/boot.img-zImage
+ramdisk/G920F/split_img/boot.img-zImage
 
 #
 # Debian directory (make deb-pkg)
