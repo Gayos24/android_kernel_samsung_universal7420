@@ -32,6 +32,6 @@ debug.atrace.tags.enableflags=0
 #
 # BOOTIMAGE_BUILD_PROPERTIES
 #
-ro.bootimage.build.date=Wed Aug 9 16:54:51 KST 2017
-ro.bootimage.build.date.utc=1502265291
-ro.bootimage.build.fingerprint=samsung/zeroltexx/zerolte:7.0/NRD90M/G925FXXU5EQH7:user/test-keys
+ro.bootimage.build.date=Mon Nov 27 11:29:21 KST 2017
+ro.bootimage.build.date.utc=1511749761
+ro.bootimage.build.fingerprint=samsung/zeroltexx/zerolte:7.0/NRD90M/G925FXXS5EQL1:user/test-keys
