@@ -1251,6 +1251,11 @@ static int s6e3hf2_wqhd_probe(struct dsim_device *dsim)
 	panel->alpm = 0;
 	panel->current_alpm = 0;
 	mutex_init(&panel->alpm_lock);
+#elif defined(CONFIG_LCD_DOZE_MODE)
+	panel->alpm_support = SUPPORT_30HZALPM; // 0 : unsupport, 1 : 30hz, 2 : 1hz
+	panel->hlpm_support = SUPPORT_30HZALPM;	// 0 : unsupport, 1 : 30hz
+	panel->alpm_mode = 0;
+	panel->curr_alpm_mode = 0;
 #endif
 
 	ret = s6e3hf2_read_init_info(dsim, mtp, hbm);
