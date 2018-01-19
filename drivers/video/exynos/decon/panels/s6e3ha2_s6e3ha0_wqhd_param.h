@@ -483,6 +483,43 @@ enum {
 	ACL_OPR_MAX
 };
 
+#if defined(CONFIG_FB_DSU)
+static const unsigned char S6E3HA2_SEQ_DDI_SCALER_WQHD_00[] = {
+	0xBA,
+	0x01
+};
+
+static const unsigned char S6E3HA2_SEQ_DDI_SCALER_FHD_00[] = {
+	0xBA,
+	0x00
+};
+
+static const unsigned char S6E3HA2_SEQ_DDI_SCALER_FHD_01[] = {
+	0x2A,
+	0x00, 0x00, 0x04, 0x37,
+};
+
+static const unsigned char S6E3HA2_SEQ_DDI_SCALER_FHD_02[] = {
+	0x2B,
+	0x00, 0x00, 0x07, 0x7F,
+};
+
+static const unsigned char S6E3HA2_SEQ_DDI_SCALER_HD_00[] = {
+	0xBA,
+	0x01
+};
+
+static const unsigned char S6E3HA2_SEQ_DDI_SCALER_HD_01[] = { /* HA2 not support HD */
+	0x2A,
+	0x00, 0x00, 0x02, 0xCF,
+};
+
+static const unsigned char S6E3HA2_SEQ_DDI_SCALER_HD_02[] = {
+	0x2B,
+	0x00, 0x00, 0x04, 0xFF,
+};
+#endif
+
 #ifdef CONFIG_LCD_HMT
 #define DEFAULT_HMT_BRIGHTNESS			162
 #define	HMT_OFF							0
@@ -501,65 +538,33 @@ static const unsigned char SEQ_HMT_ON3[] = {		/* PASET Setting  */
 	0x00, 0x00, 0x09, 0xFF
 };
 
-static const unsigned char SEQ_SELECT_HLPM[] = {
-	0xBB,
-	0x54, 0x00, 0x07, 0x30
-};
+#ifdef CONFIG_LCD_DOZE_MODE
+
+static const unsigned char HF2_A2_IRC_off[2] = {0xB8, 0x00};
 
 static const unsigned char SEQ_SELECT_ALPM[] = {
 	0xBB,
-	0xC4, 0x00, 0x07, 0x30
+	0xC4
 };
 
-static const unsigned char SEQ_ALPM_ON_60[] = {
-	0x53,
-	0x02
+static const unsigned char SEQ_SELECT_HLPM[] = {
+	0xBB,
+	0x54
 };
 
-static const unsigned char SEQ_ALPM_ON_2[] = {
-	0x53,
-	0x03
+static const unsigned char SEQ_2NIT_MODE_ON[] = {
+	0x53, 0x03
 };
 
-static const unsigned char SEQ_ALPM_OFF[] = {
-	0x53,
-	0x00
-};
-
-static const unsigned char SEQ_SRC_LOAD_EN_HLPM[] = {
-	0xFD,
-	0xA1, 0x20, 0x08, 0x04, 0x44, 0x00,
-	0x8C
-};
-
-static const unsigned char SEQ_SRC_LOAD_EN_ALPM[] = {
-	0xFD,
-	0xA1, 0x20, 0x08, 0x04, 0x44, 0x00,
-	0x0C
-};
-
-static const unsigned char SEQ_LTPS_EQ_1[] = {
-	0xB0,
-	0x24
-};
-
-static const unsigned char SEQ_LTPS_EQ_2[] = {
-	0xFD,
-	0x01, 0x01, 0x01
-};
-
-static const unsigned char SEQ_PARTIAL_MODE_ON[] = {
-	0x12
+static const unsigned char SEQ_40NIT_MODE_ON[] = {
+	0x53, 0x02
 };
 
 static const unsigned char SEQ_NORMAL_MODE_ON[] = {
-	0x13
+	0x53, 0x00
 };
 
-static const unsigned char SEQ_PARTIAL_AREA_SETTING[] = {
-	0x30,
-	0x07, 0x7E, 0x07, 0x7F
-};
+#endif
 
 static const unsigned char SEQ_HMT_OFF1[] = {	/* aid */
 	0xB2,

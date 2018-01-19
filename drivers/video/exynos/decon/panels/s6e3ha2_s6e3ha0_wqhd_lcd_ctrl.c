@@ -156,6 +156,54 @@ displayon_err:
 	return ret;
 }
 
+#if defined(CONFIG_FB_DSU)
+static int _s6e3ha2_wqhd_dsu_command(struct dsim_device *dsim, int xres, int yres)
+{
+	int ret = 0;
+
+	switch( xres ) {
+	case 1080:
+		ret = dsim_write_hl_data(dsim, S6E3HA2_SEQ_DDI_SCALER_FHD_00, ARRAY_SIZE(S6E3HA2_SEQ_DDI_SCALER_FHD_00));
+		if (ret < 0) {
+			dsim_err("%s : fail to write CMD : S6E3HA2_SEQ_DDI_SCALER_FHD_00\n", __func__);
+		}
+	break;
+	case 1440:
+		ret = dsim_write_hl_data(dsim, S6E3HA2_SEQ_DDI_SCALER_WQHD_00, ARRAY_SIZE(S6E3HA2_SEQ_DDI_SCALER_WQHD_00));
+		if (ret < 0) {
+			dsim_err("%s : fail to write CMD : S6E3HA2_SEQ_DDI_SCALER_WQHD_00\n", __func__);
+		}
+	break;
+	default:
+		dsim_err("%s : xres=%d, yres=%d, Unknown\n", __func__, xres, yres );
+	break;
+	}
+
+	dsim_info("%s : xres=%d, yres=%d\n", __func__, xres, yres );
+	return ret;
+}
+
+static int s6e3ha2_wqhd_dsu_command(struct dsim_device *dsim)
+{
+	int ret = 0;
+
+	ret = dsim_write_hl_data(dsim, SEQ_TEST_KEY_ON_F0, ARRAY_SIZE(SEQ_TEST_KEY_ON_F0));
+	if (ret < 0) {
+		dsim_err("%s : fail to write CMD : SEQ_TEST_KEY_ON_F0\n", __func__);
+	}
+
+	ret = _s6e3ha2_wqhd_dsu_command( dsim, dsim->dsu_xres, dsim->dsu_yres );
+
+	ret = dsim_write_hl_data(dsim, SEQ_TEST_KEY_OFF_FC, ARRAY_SIZE(SEQ_TEST_KEY_OFF_FC));
+	if (ret < 0) {
+		dsim_err("%s : fail to write CMD : SEQ_TEST_KEY_ON_FC\n", __func__);
+	}
+
+	dsim_info("%s : xres=%d, yres=%d\n", __func__, dsim->dsu_xres, dsim->dsu_yres);
+	return ret;
+}
+#endif
+
 
 static int s6e3ha0_wqhd_exit(struct dsim_device *dsim)
 {
@@ -1444,6 +1492,9 @@ static int s6e3ha2_wqhd_init(struct dsim_device *dsim)
 	} while( s6e3ha2_read_reg_status(dsim, false ) && cnt++ <3 );
 	// if( cnt >= 3 ) panic( "s6e3ha2_read_reg_status()" );
 
+#ifdef CONFIG_FB_DSU
+	ret = _s6e3ha2_wqhd_dsu_command( dsim, dsim->dsu_xres, dsim->dsu_yres );
+#endif
 #ifdef CONFIG_LCD_HMT
 	if(dsim->priv.hmt_on != HMT_ON)
 #endif
@@ -1534,7 +1585,7 @@ static int s6e3ha2_wqhd_init(struct dsim_device *dsim)
 	}
 	ret = dsim_write_hl_data(dsim, S6E3HA2_SEQ_VINT_SET, ARRAY_SIZE(S6E3HA2_SEQ_VINT_SET));
 	if (ret < 0) {
-		dsim_err(":%s fail to write CMD : SEQ_ELVSS_SET\n", __func__);
+		dsim_err(":%s fail to write CMD : SEQ_VINT_SET\n", __func__);
 		goto init_exit;
 	}
 
@@ -1582,122 +1633,41 @@ int s6e3ha2_wqhd_setalpm(struct dsim_device *dsim, int mode)
 {
 	int ret = 0;
 
-	msleep(20);
-
 	switch(mode) {
 		case HLPM_ON_LOW:
-			ret = dsim_write_hl_data(dsim, SEQ_SELECT_HLPM, ARRAY_SIZE(SEQ_SELECT_HLPM));
-			if (ret < 0) {
-				dsim_err("%s : fail to write CMD : SEQ_SELECT_HLPM\n", __func__);
-			}
-			ret = dsim_write_hl_data(dsim, SEQ_ALPM_ON_2, ARRAY_SIZE(SEQ_ALPM_ON_2));
-			if (ret < 0) {
-				dsim_err("%s : fail to write CMD : SEQ_ALPM_ON_2\n", __func__);
-			}
-			ret = dsim_write_hl_data(dsim, SEQ_LTPS_EQ_1, ARRAY_SIZE(SEQ_LTPS_EQ_1));
-			if (ret < 0) {
-				dsim_err("%s : fail to write CMD : SEQ_LTPS_EQ_1\n", __func__);
-			}
-			ret = dsim_write_hl_data(dsim, SEQ_LTPS_EQ_2, ARRAY_SIZE(SEQ_LTPS_EQ_2));
-			if (ret < 0) {
-				dsim_err("%s : fail to write CMD : SEQ_LTPS_EQ_2\n", __func__);
-			}
-			ret = dsim_write_hl_data(dsim, SEQ_GAMMA_UPDATE, ARRAY_SIZE(SEQ_GAMMA_UPDATE));
-			if (ret < 0) {
-				dsim_err("%s : fail to write CMD : SEQ_GAMMA_UPDATE\n", __func__);
-			}
-			ret = dsim_write_hl_data(dsim, SEQ_SRC_LOAD_EN_HLPM, ARRAY_SIZE(SEQ_SRC_LOAD_EN_HLPM));
-			if (ret < 0) {
-				dsim_err("%s : fail to write CMD : SEQ_SRC_LOAD_EN_HLPM\n", __func__);
-			}
+			dsim_write_hl_data(dsim, SEQ_SELECT_HLPM, ARRAY_SIZE(SEQ_SELECT_HLPM));
+			dsim_write_hl_data(dsim, SEQ_2NIT_MODE_ON, ARRAY_SIZE(SEQ_2NIT_MODE_ON));
 			pr_info("%s : HLPM_ON_2NIT !\n", __func__);
 			break;
 		case HLPM_ON_HIGH:
-			ret = dsim_write_hl_data(dsim, SEQ_SELECT_HLPM, ARRAY_SIZE(SEQ_SELECT_HLPM));
-			if (ret < 0) {
-				dsim_err("%s : fail to write CMD : SEQ_SELECT_HLPM\n", __func__);
-			}
-			ret = dsim_write_hl_data(dsim, SEQ_ALPM_ON_60, ARRAY_SIZE(SEQ_ALPM_ON_60));
-			if (ret < 0) {
-				dsim_err("%s : fail to write CMD : SEQ_ALPM_ON_60\n", __func__);
-			}
-			ret = dsim_write_hl_data(dsim, SEQ_LTPS_EQ_1, ARRAY_SIZE(SEQ_LTPS_EQ_1));
-			if (ret < 0) {
-				dsim_err("%s : fail to write CMD : SEQ_LTPS_EQ_1\n", __func__);
-			}
-			ret = dsim_write_hl_data(dsim, SEQ_LTPS_EQ_2, ARRAY_SIZE(SEQ_LTPS_EQ_2));
-			if (ret < 0) {
-				dsim_err("%s : fail to write CMD : SEQ_LTPS_EQ_2\n", __func__);
-			}
-			ret = dsim_write_hl_data(dsim, SEQ_GAMMA_UPDATE, ARRAY_SIZE(SEQ_GAMMA_UPDATE));
-			if (ret < 0) {
-				dsim_err("%s : fail to write CMD : SEQ_GAMMA_UPDATE\n", __func__);
-			}
-			ret = dsim_write_hl_data(dsim, SEQ_SRC_LOAD_EN_HLPM, ARRAY_SIZE(SEQ_SRC_LOAD_EN_HLPM));
-			if (ret < 0) {
-				dsim_err("%s : fail to write CMD : SEQ_SRC_LOAD_EN_HLPM\n", __func__);
-			}
-			pr_info("%s : HLPM_ON_60NIT !\n", __func__);
+		        dsim_write_hl_data(dsim, SEQ_SELECT_HLPM, ARRAY_SIZE(SEQ_SELECT_HLPM));
+			dsim_write_hl_data(dsim, SEQ_40NIT_MODE_ON, ARRAY_SIZE(SEQ_40NIT_MODE_ON));
+			pr_info("%s : HLPM_ON_40NIT !\n", __func__);
 			break;
 		case ALPM_ON_LOW:
-			ret = dsim_write_hl_data(dsim, SEQ_SELECT_ALPM, ARRAY_SIZE(SEQ_SELECT_ALPM));
-			if (ret < 0) {
-				dsim_err("%s : fail to write CMD : SEQ_SELECT_ALPM\n", __func__);
-			}
-			ret = dsim_write_hl_data(dsim, SEQ_ALPM_ON_2, ARRAY_SIZE(SEQ_ALPM_ON_2));
-			if (ret < 0) {
-				dsim_err("%s : fail to write CMD : SEQ_ALPM_ON_2\n", __func__);
-			}
-			ret = dsim_write_hl_data(dsim, SEQ_LTPS_EQ_1, ARRAY_SIZE(SEQ_LTPS_EQ_1));
-			if (ret < 0) {
-				dsim_err("%s : fail to write CMD : SEQ_LTPS_EQ_1\n", __func__);
-			}
-			ret = dsim_write_hl_data(dsim, SEQ_LTPS_EQ_2, ARRAY_SIZE(SEQ_LTPS_EQ_2));
-			if (ret < 0) {
-				dsim_err("%s : fail to write CMD : SEQ_LTPS_EQ_2\n", __func__);
-			}
-			ret = dsim_write_hl_data(dsim, SEQ_GAMMA_UPDATE, ARRAY_SIZE(SEQ_GAMMA_UPDATE));
-			if (ret < 0) {
-				dsim_err("%s : fail to write CMD : SEQ_GAMMA_UPDATE\n", __func__);
-			}
-			ret = dsim_write_hl_data(dsim, SEQ_SRC_LOAD_EN_ALPM, ARRAY_SIZE(SEQ_SRC_LOAD_EN_ALPM));
-			if (ret < 0) {
-				dsim_err("%s : fail to write CMD : SEQ_SRC_LOAD_EN_ALPM\n", __func__);
-			}
+		        dsim_write_hl_data(dsim, SEQ_SELECT_ALPM, ARRAY_SIZE(SEQ_SELECT_ALPM));
+			dsim_write_hl_data(dsim, SEQ_2NIT_MODE_ON, ARRAY_SIZE(SEQ_2NIT_MODE_ON));
 			pr_info("%s : ALPM_ON_2NIT !\n", __func__);
 			break;
 		case ALPM_ON_HIGH:
-			ret = dsim_write_hl_data(dsim, SEQ_SELECT_ALPM, ARRAY_SIZE(SEQ_SELECT_ALPM));
-			if (ret < 0) {
-				dsim_err("%s : fail to write CMD : SEQ_SELECT_ALPM\n", __func__);
-			}
-			ret = dsim_write_hl_data(dsim, SEQ_ALPM_ON_60, ARRAY_SIZE(SEQ_ALPM_ON_60));
-			if (ret < 0) {
-				dsim_err("%s : fail to write CMD : SEQ_ALPM_ON_60\n", __func__);
-			}
-			ret = dsim_write_hl_data(dsim, SEQ_LTPS_EQ_1, ARRAY_SIZE(SEQ_LTPS_EQ_1));
-			if (ret < 0) {
-				dsim_err("%s : fail to write CMD : SEQ_LTPS_EQ_1\n", __func__);
-			}
-			ret = dsim_write_hl_data(dsim, SEQ_LTPS_EQ_2, ARRAY_SIZE(SEQ_LTPS_EQ_2));
-			if (ret < 0) {
-				dsim_err("%s : fail to write CMD : SEQ_LTPS_EQ_2\n", __func__);
-			}
-			ret = dsim_write_hl_data(dsim, SEQ_GAMMA_UPDATE, ARRAY_SIZE(SEQ_GAMMA_UPDATE));
-			if (ret < 0) {
-				dsim_err("%s : fail to write CMD : SEQ_GAMMA_UPDATE\n", __func__);
-			}
-			ret = dsim_write_hl_data(dsim, SEQ_SRC_LOAD_EN_ALPM, ARRAY_SIZE(SEQ_SRC_LOAD_EN_ALPM));
-			if (ret < 0) {
-				dsim_err("%s : fail to write CMD : SEQ_SRC_LOAD_EN_ALPM\n", __func__);
-			}
-			pr_info("%s : ALPM_ON_60NIT !\n", __func__);
+			dsim_write_hl_data(dsim, SEQ_SELECT_ALPM, ARRAY_SIZE(SEQ_SELECT_ALPM));
+			dsim_write_hl_data(dsim, SEQ_40NIT_MODE_ON, ARRAY_SIZE(SEQ_40NIT_MODE_ON));
+			pr_info("%s : ALPM_ON_40NIT !\n", __func__);
 			break;
 		default:
 			pr_info("%s: input is out of range : %d \n", __func__, mode);
-			break;
+			goto exit_setalpm;
 	}
+
+	dsim_write_hl_data(dsim, HF2_A2_IRC_off, ARRAY_SIZE(HF2_A2_IRC_off));
+	dsim_write_hl_data(dsim, SEQ_GAMMA_UPDATE, ARRAY_SIZE(SEQ_GAMMA_UPDATE));
+	dsim_write_hl_data(dsim, SEQ_GAMMA_UPDATE_L, ARRAY_SIZE(SEQ_GAMMA_UPDATE_L));
+
 	return ret;
+
+exit_setalpm:
+	return ret;
+
 }
 
 static int s6e3ha2_wqhd_enteralpm(struct dsim_device *dsim)
@@ -1712,12 +1682,6 @@ static int s6e3ha2_wqhd_enteralpm(struct dsim_device *dsim)
 		return ret;
 	}
 
-	ret = dsim_write_hl_data(dsim, S6E3HA2_SEQ_DISPLAY_OFF, ARRAY_SIZE(S6E3HA2_SEQ_DISPLAY_OFF));
-	if (ret < 0) {
-		dsim_err("%s : fail to write CMD : S6E3HA2_SEQ_DISPLAY_OFF\n", __func__);
-	}
-	msleep(20);
-
 	ret = dsim_write_hl_data(dsim, SEQ_TEST_KEY_ON_F0, ARRAY_SIZE(SEQ_TEST_KEY_ON_F0));
 	if (ret < 0) {
 		dsim_err("%s : fail to write CMD : SEQ_TEST_KEY_ON_F0\n", __func__);
@@ -1727,6 +1691,10 @@ static int s6e3ha2_wqhd_enteralpm(struct dsim_device *dsim)
 		dsim_err("%s : fail to write CMD : SEQ_TEST_KEY_ON_FC\n", __func__);
 	}
 
+	ret = dsim_write_hl_data(dsim, S6E3HA2_SEQ_DISPLAY_OFF, ARRAY_SIZE(S6E3HA2_SEQ_DISPLAY_OFF));
+	if (ret < 0) {
+		dsim_err("%s : fail to write CMD : S6E3HA2_SEQ_DISPLAY_OFF\n", __func__);
+	}
 	ret = s6e3ha2_wqhd_setalpm(dsim, panel->alpm_mode);
 	if (ret < 0) {
 		dsim_err("%s : failed to set alpm\n", __func__);
@@ -1754,11 +1722,10 @@ static int s6e3ha2_wqhd_exitalpm(struct dsim_device *dsim)
 		return ret;
 	}
 
-	ret = dsim_write_hl_data(dsim, S6E3HA2_SEQ_DISPLAY_OFF, ARRAY_SIZE(S6E3HA2_SEQ_DISPLAY_OFF));
+	ret = dsim_write_hl_data(dsim, S6E3HA2_SEQ_DISPLAY_ON, ARRAY_SIZE(S6E3HA2_SEQ_DISPLAY_ON));
 	if (ret < 0) {
-		dsim_err("%s : fail to write CMD : DISPLAY_OFF\n", __func__);
+		dsim_err("%s : fail to write CMD : DISPLAY_ON\n", __func__);
 	}
-	msleep(20);
 
 	ret = dsim_write_hl_data(dsim, SEQ_TEST_KEY_ON_F0, ARRAY_SIZE(SEQ_TEST_KEY_ON_F0));
 	if (ret < 0) {
@@ -1770,20 +1737,9 @@ static int s6e3ha2_wqhd_exitalpm(struct dsim_device *dsim)
 		dsim_err("%s : fail to write CMD : SEQ_TEST_KEY_ON_FC\n", __func__);
 	}
 
-	ret = dsim_write_hl_data(dsim, SEQ_ALPM_OFF, ARRAY_SIZE(SEQ_ALPM_OFF));
+	ret = dsim_write_hl_data(dsim, SEQ_NORMAL_MODE_ON, ARRAY_SIZE(SEQ_NORMAL_MODE_ON));
 	if (ret < 0) {
-		dsim_err("%s : fail to write CMD : SEQ_ALPM_OFF\n", __func__);
-	}
-	pr_info("%s : ALPM_OFF !\n", __func__);
-
-	ret = dsim_write_hl_data(dsim, SEQ_SRC_LOAD_EN_ALPM, ARRAY_SIZE(SEQ_SRC_LOAD_EN_ALPM));
-	if (ret < 0) {
-		dsim_err("%s : fail to write CMD : SEQ_SRC_LOAD_EN_ALPM\n", __func__);
-	}
-
-	ret = dsim_write_hl_data(dsim, SEQ_GAMMA_UPDATE, ARRAY_SIZE(SEQ_GAMMA_UPDATE));
-	if (ret < 0) {
-		dsim_err("%s : fail to write CMD : SEQ_GAMMA_UPDATE\n", __func__);
+		dsim_err("%s : fail to write CMD : SEQ_NORMAL_MODE_ON\n", __func__);
 	}
 
 	ret = dsim_write_hl_data(dsim, SEQ_TEST_KEY_OFF_F0, ARRAY_SIZE(SEQ_TEST_KEY_OFF_F0));
@@ -1806,6 +1762,10 @@ struct dsim_panel_ops s6e3ha2_panel_ops = {
 	.exit		= s6e3ha2_wqhd_exit,
 	.init		= s6e3ha2_wqhd_init,
 	.dump 		= s6e3ha2_wqhd_dump,
+#ifdef CONFIG_FB_DSU
+	.dsu_cmd = s6e3ha2_wqhd_dsu_command,
+#endif
+
 #ifdef CONFIG_LCD_DOZE_MODE
 	.enteralpm = s6e3ha2_wqhd_enteralpm,
 	.exitalpm = s6e3ha2_wqhd_exitalpm,
